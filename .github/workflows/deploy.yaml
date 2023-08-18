@@ -39,4 +39,4 @@ jobs:
     - name: Update AWS Lambda with new image
       run: |
         aws lambda update-function-code --function-name SpotifyMusicAnalyzerFunction \
-        --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        --image-uri ${{ secrets.AWS_USER_ID }}.dkr.ecr.ap-northeast-1.amazonaws.com/spotify_music_analyzer:${{ github.sha }}
