@@ -10,11 +10,11 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # ラムダ関数のコードと共通のモジュールをコンテナにコピーします。
-COPY lambda_function.py .
+COPY index.py .
 COPY create_artist_analysis_service.py .
 COPY common/ common/
 
 # ラムダ関数のエントリーポイント（ハンドラ関数）を設定します。
 # この例では、lambda_function.py内の`handler_function`という関数をエントリーポイントとしています。
 # 必要に応じて適切なハンドラ関数名に変更してください。
-CMD ["lambda_function.handler_function"]
+CMD ["index.handler"]

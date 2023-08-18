@@ -16,7 +16,7 @@ LINE_HEADERS = {
     "Authorization": f"Bearer {os.environ['LINE_ACCESS_TOKEN']}"
 }
 
-def lambda_handler(event, context):
+def handler(event, context):
     try:
         request_body = json.loads(event["body"])
         user_id = request_body["events"][0]["source"]["userId"]  # ユーザーIDの取得
