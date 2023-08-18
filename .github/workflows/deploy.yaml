@@ -1,0 +1,49 @@
+# ワークフローの名前を定義します。
+name: spotify-music-analzyer
+
+# このワークフローがトリガーされるイベントを定義します。この場合、mainブランチへのプッシュ時にトリガーされます。
+on:
+  push:
+    branches:
+      - main
+
+# ワークフロー内のジョブを定義します。この例では「deploy」という名前のジョブが1つだけ定義されています。
+jobs:
+  deploy:
+    # このジョブが実行されるGitHub ActionsランナーのOSを指定します。
+    runs-on: ubuntu-latest
+
+    # ジョブ内のステップを定義します。各ステップは順番に実行されます。
+    steps:
+    # ソースコードをGitHubリポジトリからチェックアウトします。
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    # AWS CLIをセットアップします。このステップでAWSへの認証も行います。
+    - name: Setup AWS CLI
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}  # GitHub SecretsからAWSのアクセスキーを取得します。
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # GitHub SecretsからAWSのシークレットキーを取得します。
+        aws-region: ap-northeast-1  
+
+    # Amazon ECRへログインします。これにより、次のステップでDockerイメージをECRにプッシュできるようになります。
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    # Dockerイメージをビルドし、タグを付けて、ECRにプッシュします。
+    - name: Build, tag, and push image to Amazon ECR
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}  # ECRのレジストリURLを取得します。
+        ECR_REPOSITORY: spotify-music-analzyer
+        IMAGE_TAG: ${{ github.sha }}  # イメージのタグとして、現在のコミットのSHA値を使用します。
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .  # Dockerイメージをビルドします。
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG  # ビルドしたイメージをECRにプッシュします。
+
+    # Lambda関数のコードを新しくビルドしたDockerイメージで更新します。
+    - name: spotify-music-analzyer
+      run: |
+        aws lambda update-function-code --function-name your-function-name --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
