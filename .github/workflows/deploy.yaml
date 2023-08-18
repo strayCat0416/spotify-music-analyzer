@@ -38,5 +38,5 @@ jobs:
     # Lambda関数のコードを新しくビルドしたDockerイメージで更新します。
     - name: Update AWS Lambda with new image
       run: |
-        aws lambda update-function-code --function-name CreateArtistAnalysisFunction \
+        aws lambda update-function-code --function-name SpotifyMusicAnalyzerFunction \
         --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
