@@ -2,3 +2,4 @@ requests==2.25.1
 numpy>=1.19.5
 pandas
 spotipy
+boto3
